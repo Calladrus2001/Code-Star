@@ -141,14 +141,9 @@ class _AuthScreenState extends State<AuthScreen> {
                                             Radius.circular(25))),
                                   ),
                                   onTap: () {
-                                    // if (hasAccount) {
-                                    //   SignUp(_email, _password);
-                                    //   users
-                                    //       .doc(_email)
-                                    //       .set({"Designer": isDesigner});
-                                    // } else {
-                                    //   SignIn(_email, _password);
-                                    // }
+                                    hasAccount
+                                        ? SignUp(_email, _password)
+                                        : SignIn(_email, _password);
                                     emailController.text = "";
                                     passController.text = "";
                                   },

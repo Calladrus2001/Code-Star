@@ -1,4 +1,7 @@
 import 'package:code_star/Utils/constants.dart';
+import 'package:code_star/Views/Appointment.dart';
+import 'package:code_star/Views/Audio/Audio.dart';
+import 'package:code_star/Views/Profile.dart';
 import 'package:flutter/material.dart';
 
 class Homepage extends StatefulWidget {
@@ -9,7 +12,7 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  List<Widget> bodyPages = [];
+  List<Widget> bodyPages = [ProfileScreen(), AudioScreen(), AppointScreen()];
   int _index = 1;
 
   @override
@@ -26,9 +29,9 @@ class _HomepageState extends State<Homepage> {
                 icon: Icon(Icons.account_circle_rounded),
                 label: "Your Profile"),
             BottomNavigationBarItem(
-                icon: Icon(Icons.image_rounded), label: "Exhibits"),
+                icon: Icon(Icons.speaker_notes_outlined), label: "Audiobooks"),
             BottomNavigationBarItem(
-                icon: Icon(Icons.newspaper_rounded), label: "News"),
+                icon: Icon(Icons.group), label: "Appointments"),
           ],
           onTap: (int index) {
             setState(() {

@@ -15,7 +15,10 @@ class _TestChoiceState extends State<TestChoice> {
         body: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
-        children: [],
+        children: [
+          SizedBox(height: 180),
+
+        ],
       ),
     ));
   }

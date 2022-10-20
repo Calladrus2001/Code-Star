@@ -1,9 +1,13 @@
 import 'dart:io';
 import 'package:code_star/Utils/constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class AddAudioScreen extends StatefulWidget {
   const AddAudioScreen({Key? key}) : super(key: key);
@@ -16,9 +20,20 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
   List<XFile>? _images = [];
   final ImagePicker _picker = ImagePicker();
   bool haveImages = false;
+  bool haveAudio = false;
   int index = 0;
+  String text = "";
+  late String downloadUrl;
+  late FlutterTts flutterTts;
+
+  void initTTS() async {
+    flutterTts = FlutterTts();
+    await flutterTts.setSpeechRate(0.6);
+  }
+
   @override
   void initState() {
+    initTTS();
     super.initState();
   }
 
@@ -40,12 +55,14 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                   onTap: () {
                     Get.defaultDialog(
                         title: "Help",
-                        titleStyle: TextStyle(color: Colors.grey),
+                        titleStyle: TextStyle(color: clr1),
                         radius: 10,
                         content: Text(
-                            "1. Select images of the study material you would like to made Audiofile for.\n\n"
-                            "2. Press the Upload Button to generate the AudioFile and save it to Cloud.\n\n"
-                            "3. Thats it!"));
+                          "1. Select images of the study material you would like to made Audiofile for.\n\n"
+                          "2. Press the Upload Button to generate the AudioFile and save it to Cloud.\n\n"
+                          "3. Thats it!",
+                          style: TextStyle(color: Colors.grey),
+                        ));
                   },
                 ),
                 SizedBox(height: 20),
@@ -108,6 +125,7 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                     onTap: () async {
                       _images = await _picker.pickMultiImage();
                       if (_images != null) {
+                        imagesToText(_images!);
                         setState(() {
                           haveImages = true;
                         });
@@ -115,12 +133,40 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                     },
                   ),
             SizedBox(height: 16),
-            Center(child: Text("${index + 1}/${_images!.length}")),
+            haveImages
+                ? Center(child: Text("${index + 1}/${_images!.length}"))
+                : SizedBox(),
             SizedBox(height: 24),
 
-            /// generate AudioFile
+            /// checklist
             haveImages
-                ? GestureDetector(
+                ? Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          text == null
+                              ? CircularProgressIndicator()
+                              : Icon(Icons.check),
+                          SizedBox(width: 10),
+                          Text(text == null
+                              ? "Getting Text from images"
+                              : "Got Text from images"),
+                        ],
+                      )
+                    ],
+                  )
+                : SizedBox(),
+            SizedBox(height: 16),
+
+            /// generate AudioFile
+            haveAudio
+                ? Chip(
+                    backgroundColor: Colors.green.shade500,
+                    label: Text("Audiobook is available now",
+                        style: TextStyle(color: Colors.white)),
+                  )
+                : GestureDetector(
                     child: Container(
                       height: 50,
                       width: 110,
@@ -134,13 +180,50 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                       ),
                     ),
                     onTap: () {
-                      //TODO: do the magic
+                      synth(text);
                     },
-                  )
-                : SizedBox()
+                  ),
           ],
         ),
       ),
     );
+  }
+
+  void imagesToText(List<XFile> _images) {
+    for (int i = 0; i < _images.length; i++) {
+      getRecognisedText(_images[i]);
+    }
+  }
+
+  void getRecognisedText(XFile image) async {
+    final inputImage = InputImage.fromFilePath(image.path);
+    final TextRecognizer textRecognizer =
+        TextRecognizer(script: TextRecognitionScript.latin);
+    final RecognizedText recognizedText =
+        await textRecognizer.processImage(inputImage);
+    for (TextBlock block in recognizedText.blocks) {
+      for (TextLine line in block.lines) {
+        text = text + line.text + "\n";
+      }
+    }
+    textRecognizer.close();
+  }
+
+  void synth(String text) async {
+    await flutterTts.synthesizeToFile(text, "tts.wav");
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String appDocPath = appDocDir.path;
+    final destination = "${FirebaseAuth.instance.currentUser!.email}/tts.wav";
+    final ref = FirebaseStorage.instance.ref(destination);
+    print(appDocPath);
+    UploadTask? task = ref.putFile(File(
+        "/storage/emulated/0/Android/data/com.example.code_star/files/tts.wav"));
+    task.then((res) async {
+      downloadUrl = await res.ref.getDownloadURL();
+      //TODO: mongoDB add download url for user
+      setState(() {
+        haveAudio = true;
+      });
+    });
   }
 }

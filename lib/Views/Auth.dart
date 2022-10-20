@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:code_star/Utils/constants.dart';
 import 'package:code_star/Views/Home.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +10,6 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool hasAccount = true;
-  bool isDesigner = false;
   final emailController = new TextEditingController();
   final passController = new TextEditingController();
   String _email = "";
@@ -21,8 +19,6 @@ class _AuthScreenState extends State<AuthScreen> {
   void initState() {
     super.initState();
   }
-
-  // CollectionReference users = FirebaseFirestore.instance.collection("Users");
 
   @override
   Widget build(BuildContext context) {

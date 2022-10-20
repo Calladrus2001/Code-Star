@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:code_star/Utils/constants.dart';
 import 'package:code_star/Views/Home.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:get_storage/get_storage.dart';
 
 class AuthScreen extends StatefulWidget {
   @override
@@ -9,40 +13,35 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  bool hasAccount = true;
+  final box = GetStorage();
+  bool hasAccount = false;
   final emailController = new TextEditingController();
   final passController = new TextEditingController();
   String _email = "";
   String _password = "";
+  bool haveID = false;
 
   @override
   void initState() {
+    check();
     super.initState();
+  }
+
+  void check() async {
+    String? userID = box.read("userID");
+    if (userID != null)
+      setState(() {
+        haveID = true;
+      });
   }
 
   @override
   Widget build(BuildContext context) {
-    Color getColor(Set<MaterialState> states) {
-      const Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
-      };
-      if (states.any(interactiveStates.contains)) {
-        return clr1;
-      }
-      return clr1;
-    }
-
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Homepage();
-            } else {
-              return SingleChildScrollView(
+        backgroundColor: Colors.white,
+        body: haveID
+            ? Homepage()
+            : SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
                     Stack(
@@ -174,19 +173,34 @@ class _AuthScreenState extends State<AuthScreen> {
                     )
                   ],
                 ),
-              );
-            }
-          }),
-    );
+              ));
   }
 
   Future SignIn(String email, String password) async {
-    await FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: email, password: password);
+    var response = await http.post(Uri.parse("${baseUrl}/login"), body: {
+      "userName": emailController.text,
+      "password": passController.text
+    });
+    if (response.statusCode == 200) {
+      Map<String, dynamic> responseString = jsonDecode(response.body);
+      box.write("userID", responseString["userID"]);
+      setState(() {
+        haveID = true;
+      });
+    }
   }
 
   Future SignUp(String email, String password) async {
-    await FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email, password: password);
+    var response = await http.post(Uri.parse("${baseUrl}/addUser"), body: {
+      "userName": emailController.text,
+      "password": passController.text
+    });
+    if (response.statusCode == 200) {
+      Map<String, dynamic> responseString = jsonDecode(response.body);
+      box.write("userID", responseString["userID"]);
+      setState(() {
+        haveID = true;
+      });
+    }
   }
 }

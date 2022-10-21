@@ -9,17 +9,10 @@ class TestChoice extends StatefulWidget {
 }
 
 class _TestChoiceState extends State<TestChoice> {
+  List<Widget> bodyPages = [];
+  int _index = 1;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Column(
-        children: [
-          SizedBox(height: 180),
-
-        ],
-      ),
-    ));
+    return Scaffold();
   }
 }

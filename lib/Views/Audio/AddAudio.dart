@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:code_star/Utils/constants.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,6 +18,7 @@ class AddAudioScreen extends StatefulWidget {
 }
 
 class _AddAudioScreenState extends State<AddAudioScreen> {
+  final box = GetStorage();
   List<XFile>? _images = [];
   final ImagePicker _picker = ImagePicker();
   bool haveImages = false;
@@ -24,15 +26,16 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
   int index = 0;
   String text = "";
   late String downloadUrl;
+  late String userID;
   late FlutterTts flutterTts;
 
   void initTTS() async {
     flutterTts = FlutterTts();
-    await flutterTts.setSpeechRate(0.6);
   }
 
   @override
   void initState() {
+    userID = box.read("userID");
     initTTS();
     super.initState();
   }
@@ -114,7 +117,7 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                       height: 200,
                       width: 200,
                       decoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: clr1,
                           borderRadius: BorderRadius.all(Radius.circular(10))),
                       child: Icon(
                         Icons.add_photo_alternate_outlined,
@@ -213,17 +216,23 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
     await flutterTts.synthesizeToFile(text, "tts.wav");
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
-    final destination = "${FirebaseAuth.instance.currentUser!.email}/tts.wav";
+    final destination = "${userID}/tts.wav";
     final ref = FirebaseStorage.instance.ref(destination);
     print(appDocPath);
     UploadTask? task = ref.putFile(File(
         "/storage/emulated/0/Android/data/com.example.code_star/files/tts.wav"));
     task.then((res) async {
       downloadUrl = await res.ref.getDownloadURL();
-      //TODO: mongoDB add download url for user
-      setState(() {
-        haveAudio = true;
+      var response = await http.post(Uri.parse("${baseUrl}/addAudio"), body: {
+        "userID": userID,
+        "name": "anything for now",
+        "downloadUrl": downloadUrl
       });
+      if (response.statusCode == 200) {
+        setState(() {
+          haveAudio = true;
+        });
+      }
     });
   }
 }

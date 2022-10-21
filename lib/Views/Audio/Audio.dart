@@ -137,10 +137,10 @@ class _AudioScreenState extends State<AudioScreen> {
                                         child: ListTile(
                                           leading: Text(audioFiles[idx]["name"],
                                               style: TextStyle(color: clr1)),
-                                          trailing: Text(
-                                              audioFiles[idx]["time"],
-                                              style: TextStyle(
-                                                  color: Colors.grey)),
+                                          // trailing: Text(
+                                          //     audioFiles[idx]["time"],
+                                          //     style: TextStyle(
+                                          //         color: Colors.grey)),
                                         ),
                                         onTap: () async {
                                           await audioplayer.stop();

@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
 
 class AddAudioScreen extends StatefulWidget {
   const AddAudioScreen({Key? key}) : super(key: key);
@@ -25,6 +25,7 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
   bool haveAudio = false;
   int index = 0;
   String text = "";
+  DateTime rn = DateTime.now();
   late String downloadUrl;
   late String userID;
   late FlutterTts flutterTts;
@@ -214,25 +215,26 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
 
   void synth(String text) async {
     await flutterTts.synthesizeToFile(text, "tts.wav");
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    String appDocPath = appDocDir.path;
-    final destination = "${userID}/tts.wav";
-    final ref = FirebaseStorage.instance.ref(destination);
-    print(appDocPath);
-    UploadTask? task = ref.putFile(File(
-        "/storage/emulated/0/Android/data/com.example.code_star/files/tts.wav"));
-    task.then((res) async {
-      downloadUrl = await res.ref.getDownloadURL();
-      var response = await http.post(Uri.parse("${baseUrl}/addAudio"), body: {
-        "userID": userID,
-        "name": "anything for now",
-        "downloadUrl": downloadUrl
-      });
-      if (response.statusCode == 200) {
-        setState(() {
-          haveAudio = true;
+    await flutterTts.awaitSynthCompletion(true).then((value) async {
+      final destination = "${userID}/tts.wav";
+      final ref = FirebaseStorage.instance.ref(destination);
+      UploadTask? task = ref.putFile(File(
+          "/storage/emulated/0/Android/data/com.example.code_star/files/tts.wav"));
+      task.then((res) async {
+        downloadUrl = await res.ref.getDownloadURL();
+        var response = await http.post(Uri.parse("${baseUrl}/addAudio"), body: {
+          "userID": userID,
+          "name": "anotherTestFile",
+          "downloadUrl": downloadUrl,
+          "time":
+              "${DateFormat.MMMMd().format(rn)} ${DateFormat.jm().format(rn)}"
         });
-      }
+        if (response.statusCode == 200) {
+          setState(() {
+            haveAudio = true;
+          });
+        }
+      });
     });
   }
 }

@@ -47,7 +47,11 @@ class _AudioScreenState extends State<AudioScreen> {
         position = newPosition;
       });
     });
-
+    audioplayer.onPlayerComplete.listen((event) {
+      setState(() {
+        position = Duration.zero;
+      });
+    });
     super.initState();
   }
 
@@ -129,8 +133,25 @@ class _AudioScreenState extends State<AudioScreen> {
                                   itemBuilder: (context, int idx) {
                                     return Card(
                                       elevation: 2.0,
-                                      child: ListTile(
-                                        leading: Text(audioFiles[idx]["name"]),
+                                      child: GestureDetector(
+                                        child: ListTile(
+                                          leading: Text(audioFiles[idx]["name"],
+                                              style: TextStyle(color: clr1)),
+                                          trailing: Text(
+                                              audioFiles[idx]["time"],
+                                              style: TextStyle(
+                                                  color: Colors.grey)),
+                                        ),
+                                        onTap: () async {
+                                          await audioplayer.stop();
+                                          setState(() {
+                                            position = Duration.zero;
+                                            url =
+                                                audioFiles[idx]["downloadUrl"];
+                                          });
+                                          await audioplayer
+                                              .play(UrlSource(url));
+                                        },
                                       ),
                                     );
                                   }),
@@ -194,10 +215,15 @@ class _AudioScreenState extends State<AudioScreen> {
                                   ),
                                 ),
                                 onTap: () async {
-                                  if (isPlaying) {
-                                    await audioplayer.pause();
+                                  if (url == "") {
+                                    Get.snackbar(
+                                        "Code:Star", "No File Selected");
                                   } else {
-                                    await audioplayer.play(UrlSource(url));
+                                    if (isPlaying) {
+                                      await audioplayer.pause();
+                                    } else {
+                                      await audioplayer.play(UrlSource(url));
+                                    }
                                   }
                                 },
                               ),
@@ -210,6 +236,8 @@ class _AudioScreenState extends State<AudioScreen> {
                     )),
                   ),
                 ),
+
+                /// swipe right for drawer
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Icon(

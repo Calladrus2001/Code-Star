@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:blur/blur.dart';
 import 'package:code_star/Utils/constants.dart';
 import 'package:code_star/Views/Audio/AddAudio.dart';
 import 'package:get_storage/get_storage.dart';
@@ -8,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:code_star/Views/Evaluate/Evaluate.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+enum fileStatus { GOT_FILES, SEARCHING, DO_NOT_EXIST }
 
 class AudioScreen extends StatefulWidget {
   const AudioScreen({Key? key}) : super(key: key);
@@ -20,9 +21,9 @@ class _AudioScreenState extends State<AudioScreen> {
   final box = GetStorage();
   late String userID;
   List<dynamic> audioFiles = [];
-  bool haveFiles = true;
   final audioplayer = AudioPlayer();
   bool isPlaying = false;
+  fileStatus status = fileStatus.SEARCHING;
   Duration duration = Duration.zero;
   Duration position = Duration.zero;
   String url = "https://www2.cs.uic.edu/~i101/SoundFiles/PinkPanther60.wav";
@@ -59,11 +60,17 @@ class _AudioScreenState extends State<AudioScreen> {
     var response =
         await http.get(Uri.parse("${baseUrl}/getAudio?userID=${userID}"));
     if (response.statusCode == 200) {
-      Map<String, dynamic> responseString = jsonDecode(response.body);
-      audioFiles = responseString["audioFiles"];
-      if (audioFiles != null) {
+      try {
+        Map<String, dynamic> responseString = jsonDecode(response.body);
+        audioFiles = responseString["audioFiles"];
+        if (audioFiles != null) {
+          setState(() {
+            status = fileStatus.GOT_FILES;
+          });
+        }
+      } catch (e) {
         setState(() {
-          haveFiles = true;
+          status = fileStatus.DO_NOT_EXIST;
         });
       }
     }
@@ -71,8 +78,8 @@ class _AudioScreenState extends State<AudioScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double widthVal = MediaQuery.of(context).size.width;
     return Scaffold(
+      backgroundColor: Colors.white,
       drawerEnableOpenDragGesture: true,
       drawer: Drawer(
         backgroundColor: Colors.white,
@@ -114,7 +121,7 @@ class _AudioScreenState extends State<AudioScreen> {
           ],
         ),
       ),
-      body: haveFiles
+      body: (status == fileStatus.GOT_FILES)
           ? Stack(
               children: [
                 Column(
@@ -248,7 +255,27 @@ class _AudioScreenState extends State<AudioScreen> {
                 )
               ],
             )
-          : Center(child: CircularProgressIndicator(color: clr1)),
+          : (status == fileStatus.SEARCHING)
+              ? Center(child: CircularProgressIndicator(color: clr1))
+              : Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 60),
+                        Image(
+                          image: AssetImage("assets/images/notFound.png"),
+                        ),
+                        SizedBox(height: 32),
+                        Text(
+                          "Looks like you don't have any Audiobooks yet\nSwipe right and make one!",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey, fontSize: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
     );
   }
 

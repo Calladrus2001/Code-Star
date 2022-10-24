@@ -26,6 +26,7 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
   int index = 0;
   String text = "";
   DateTime rn = DateTime.now();
+  TextEditingController nameController = new TextEditingController();
   late String downloadUrl;
   late String userID;
   late FlutterTts flutterTts;
@@ -39,6 +40,12 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
     userID = box.read("userID");
     initTTS();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
   }
 
   @override
@@ -163,6 +170,19 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                 : SizedBox(),
             SizedBox(height: 16),
 
+            /// name textfield
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: TextFormField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Enter name of Audiobook',
+                  hintText: 'ex. myAwesomeNotes',
+                ),
+              ),
+            ),
+            SizedBox(height: 32),
+
             /// generate AudioFile
             haveAudio
                 ? Chip(
@@ -184,7 +204,11 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                       ),
                     ),
                     onTap: () {
-                      synth(text);
+                      if (nameController.text == "" || _images == []) {
+                        Get.snackbar(
+                            "Code:Star", "Empty input fields detected");
+                      } else
+                        synth(text);
                     },
                   ),
           ],
@@ -214,17 +238,17 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
   }
 
   void synth(String text) async {
-    await flutterTts.synthesizeToFile(text, "tts.wav");
+    await flutterTts.synthesizeToFile(text, "${nameController.text}.wav");
     await flutterTts.awaitSynthCompletion(true).then((value) async {
-      final destination = "${userID}/tts.wav";
+      final destination = "${userID}/${nameController.text}.wav";
       final ref = FirebaseStorage.instance.ref(destination);
       UploadTask? task = ref.putFile(File(
-          "/storage/emulated/0/Android/data/com.example.code_star/files/tts.wav"));
+          "/storage/emulated/0/Android/data/com.example.code_star/files/${nameController.text}.wav"));
       task.then((res) async {
         downloadUrl = await res.ref.getDownloadURL();
         var response = await http.post(Uri.parse("${baseUrl}/addAudio"), body: {
           "userID": userID,
-          "name": "anotherTestFile",
+          "name": "${nameController.text}",
           "downloadUrl": downloadUrl,
           "time":
               "${DateFormat.MMMMd().format(rn)} ${DateFormat.jm().format(rn)}"

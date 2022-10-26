@@ -20,6 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int balance = 0;
   HistoryModel? histories = null;
   bool haveHistory = false;
+
   @override
   void initState() {
     userID = box.read("userID");

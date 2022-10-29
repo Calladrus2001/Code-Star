@@ -35,7 +35,7 @@ Following which, run `flutterfire configure` to select a project and it's target
 
 ## Diagrams
 Technical Architecture Diagram:
-![Technical Architecture Diagram]("/assets/notAssetImages/techArch.png")
+[Technical Architecture Diagram]("/assets/notAssetImages/techArch.png")
 
 
 ## Code:Star (Backend)

@@ -1,5 +1,5 @@
 import 'package:code_star/Utils/constants.dart';
-import 'package:code_star/Views/Appointment.dart';
+import 'package:code_star/Views/Community.dart';
 import 'package:code_star/Views/Audio/Audio.dart';
 import 'package:code_star/Views/Profile.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +31,7 @@ class _HomepageState extends State<Homepage> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.speaker_notes_outlined), label: "Audiobooks"),
             BottomNavigationBarItem(
-                icon: Icon(Icons.group), label: "Appointments"),
+                icon: Icon(Icons.group), label: "Community"),
           ],
           onTap: (int index) {
             setState(() {

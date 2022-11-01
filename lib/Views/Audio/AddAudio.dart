@@ -23,6 +23,7 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
   final ImagePicker _picker = ImagePicker();
   bool haveImages = false;
   bool haveAudio = false;
+  bool uploading = true;
   int index = 0;
   String text = "";
   DateTime rn = DateTime.now();
@@ -30,6 +31,7 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
   late String downloadUrl;
   late String userID;
   late FlutterTts flutterTts;
+  var progress = 0.0;
 
   void initTTS() async {
     flutterTts = FlutterTts();
@@ -149,27 +151,6 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                 : SizedBox(),
             SizedBox(height: 24),
 
-            /// checklist
-            haveImages
-                ? Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          text == null
-                              ? CircularProgressIndicator()
-                              : Icon(Icons.check),
-                          SizedBox(width: 10),
-                          Text(text == null
-                              ? "Getting Text from images"
-                              : "Got Text from images"),
-                        ],
-                      )
-                    ],
-                  )
-                : SizedBox(),
-            SizedBox(height: 16),
-
             /// name textfield
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -211,6 +192,14 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                         synth(text);
                     },
                   ),
+            SizedBox(height: 64),
+
+            ///upload progress
+            uploading
+                ? Center(
+                    child: Text("Upload: " + progress.toString() + "%",
+                        style: TextStyle(color: Colors.grey)))
+                : SizedBox()
           ],
         ),
       ),
@@ -244,6 +233,28 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
       final ref = FirebaseStorage.instance.ref(destination);
       UploadTask? task = ref.putFile(File(
           "/storage/emulated/0/Android/data/com.example.code_star/files/${nameController.text}.wav"));
+      task.snapshotEvents.listen((TaskSnapshot taskSnapshot) {
+        switch (taskSnapshot.state) {
+          case TaskState.running:
+            progress = 100.0 *
+                (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
+            break;
+          case TaskState.paused:
+            print("Upload is paused.");
+            break;
+          case TaskState.canceled:
+            print("Upload was canceled");
+            break;
+          case TaskState.error:
+            // Handle unsuccessful uploads
+            break;
+          case TaskState.success:
+            setState(() {
+              uploading = false;
+            });
+            break;
+        }
+      });
       task.then((res) async {
         downloadUrl = await res.ref.getDownloadURL();
         var response = await http.post(Uri.parse("${baseUrl}/addAudio"), body: {

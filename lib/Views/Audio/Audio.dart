@@ -19,6 +19,8 @@ class AudioScreen extends StatefulWidget {
 
 class _AudioScreenState extends State<AudioScreen> {
   final box = GetStorage();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      new GlobalKey<RefreshIndicatorState>();
   late String userID;
   List<dynamic> audioFiles = [];
   final audioplayer = AudioPlayer();
@@ -74,6 +76,13 @@ class _AudioScreenState extends State<AudioScreen> {
         });
       }
     }
+  }
+
+  void _refresh() async {
+    setState(() {
+      status = fileStatus.SEARCHING;
+    });
+    getAudioFiles();
   }
 
   @override
@@ -171,77 +180,90 @@ class _AudioScreenState extends State<AudioScreen> {
                 ),
 
                 /// Audio Player here
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    height: 105,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: clr1,
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10))),
-                    child: Center(
-                        child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        children: [
-                          Slider(
-                            inactiveColor: Colors.blueGrey.shade200,
-                            activeColor: Colors.white,
-                            min: 0,
-                            max: duration.inSeconds.toDouble(),
-                            value: position.inSeconds.toDouble(),
-                            onChanged: (value) async {
-                              final pos = Duration(seconds: value.toInt());
-                              await audioplayer.seek(pos);
-                              await audioplayer.resume();
-                            },
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(_printDuration(position),
-                                  style: TextStyle(color: Colors.white)),
-                              GestureDetector(
-                                child: CircleAvatar(
-                                  radius: 22,
-                                  backgroundColor: Colors.white,
-                                  child: CircleAvatar(
-                                    backgroundColor: clr1,
-                                    radius: 20,
-                                    child: isPlaying
-                                        ? Icon(
-                                            Icons.pause,
-                                            color: Colors.white,
-                                          )
-                                        : Icon(
-                                            Icons.play_arrow,
-                                            color: Colors.white,
-                                          ),
-                                  ),
-                                ),
-                                onTap: () async {
-                                  if (url == "") {
-                                    Get.snackbar(
-                                        "Code:Star", "No File Selected");
-                                  } else {
-                                    if (isPlaying) {
-                                      await audioplayer.pause();
-                                    } else {
-                                      await audioplayer.play(UrlSource(url));
-                                    }
-                                  }
-                                },
-                              ),
-                              Text(_printDuration(duration),
-                                  style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                        ],
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      child: Chip(
+                        label: Text("Refresh", style: TextStyle(color: clr1)),
+                        backgroundColor: Colors.white,
+                        elevation: 4.0,
                       ),
-                    )),
-                  ),
+                      onTap: () {
+                        _refresh();
+                      },
+                    ),
+                    SizedBox(height: 8),
+                    Container(
+                      height: 105,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          color: clr1,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              topRight: Radius.circular(10))),
+                      child: Center(
+                          child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          children: [
+                            Slider(
+                              inactiveColor: Colors.blueGrey.shade200,
+                              activeColor: Colors.white,
+                              min: 0,
+                              max: duration.inSeconds.toDouble(),
+                              value: position.inSeconds.toDouble(),
+                              onChanged: (value) async {
+                                final pos = Duration(seconds: value.toInt());
+                                await audioplayer.seek(pos);
+                                await audioplayer.resume();
+                              },
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(_printDuration(position),
+                                    style: TextStyle(color: Colors.white)),
+                                GestureDetector(
+                                  child: CircleAvatar(
+                                    radius: 22,
+                                    backgroundColor: Colors.white,
+                                    child: CircleAvatar(
+                                      backgroundColor: clr1,
+                                      radius: 20,
+                                      child: isPlaying
+                                          ? Icon(
+                                              Icons.pause,
+                                              color: Colors.white,
+                                            )
+                                          : Icon(
+                                              Icons.play_arrow,
+                                              color: Colors.white,
+                                            ),
+                                    ),
+                                  ),
+                                  onTap: () async {
+                                    if (url == "") {
+                                      Get.snackbar(
+                                          "Code:Star", "No File Selected");
+                                    } else {
+                                      if (isPlaying) {
+                                        await audioplayer.pause();
+                                      } else {
+                                        await audioplayer.play(UrlSource(url));
+                                      }
+                                    }
+                                  },
+                                ),
+                                Text(_printDuration(duration),
+                                    style: TextStyle(color: Colors.white)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      )),
+                    ),
+                  ],
                 ),
 
                 /// swipe right for drawer

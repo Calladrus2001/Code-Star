@@ -16,24 +16,32 @@ class _TestChoiceState extends State<TestChoice> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        currentIndex: _index,
-        selectedItemColor: clr1,
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: false,
-        items: [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle_rounded), label: "Reading"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.speaker_notes_outlined), label: "Transcription"),
-        ],
-        onTap: (int index) {
-          setState(() {
-            _index = index;
-          });
-        },
-      ),
-    );
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          currentIndex: _index,
+          selectedItemColor: clr1,
+          unselectedItemColor: Colors.grey,
+          showUnselectedLabels: false,
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.account_circle_rounded), label: "Reading"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.speaker_notes_outlined),
+                label: "Transcription"),
+          ],
+          onTap: (int index) {
+            setState(() {
+              _index = index;
+            });
+          },
+        ),
+        body: Stack(
+          children: [
+            IndexedStack(
+              index: _index,
+              children: bodyPages,
+            ),
+          ],
+        ));
   }
 }

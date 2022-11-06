@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
-enum pageStatus { START, ONGOING, RESULT }
+enum pageStatus { START, ONGOING }
 
 class ReadingTest extends StatefulWidget {
   const ReadingTest({Key? key}) : super(key: key);
@@ -196,8 +196,8 @@ class _ReadingTestState extends State<ReadingTest> {
                                           fontWeight: FontWeight.w500)))),
                           onTap: () async {
                             if (isDiffSelected) {
-                              var response =
-                                  await http.get(Uri.parse("$baseUrl/reading"));
+                              var response = await http.get(Uri.parse(
+                                  "$baseUrl/eval?userID=$UserID&type=Reading"));
                               if (response.statusCode == 200) {
                                 var responseString = response.body;
                                 Map<String, dynamic> res =
@@ -215,125 +215,121 @@ class _ReadingTestState extends State<ReadingTest> {
                         )
                       ],
                     )
-                  : status == pageStatus.ONGOING
-                      ? Column(
-                          children: [
-                            SizedBox(height: 40),
-                            Card(
-                              elevation: 4.0,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 8),
-                                height: 180,
-                                width: 300,
-                                alignment: Alignment.center,
-                                child: Text(
+                  : Column(
+                      children: [
+                        SizedBox(height: 40),
+                        Card(
+                          elevation: 4.0,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            height: 180,
+                            width: 300,
+                            alignment: Alignment.center,
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              "${sentences[index]}",
+                              style: TextStyle(color: clr1, fontSize: 18),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 18),
+                        Card(
+                          elevation: 4.0,
+                          child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              height: 180,
+                              width: 300,
+                              alignment: Alignment.center,
+                              child: Text(textController.text,
                                   textAlign: TextAlign.center,
-                                  "${sentences[index]}",
-                                  style: TextStyle(color: clr1, fontSize: 18),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 18),
-                            Card(
-                              elevation: 4.0,
-                              child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 8),
-                                  height: 180,
-                                  width: 300,
-                                  alignment: Alignment.center,
-                                  child: Text(textController.text,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: clr1, fontSize: 18))),
-                            ),
-                            SizedBox(height: 64),
-                            isComplete
-                                ? Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      GestureDetector(
-                                        child: Center(
-                                          child: CircleAvatar(
-                                            backgroundColor: clr1,
-                                            minRadius: 24,
-                                            child: Icon(Icons.refresh_rounded,
-                                                color: Colors.white),
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          setState(() {
-                                            textController.text = "";
-                                            isComplete = false;
-                                          });
-                                        },
+                                  style: TextStyle(color: clr1, fontSize: 18))),
+                        ),
+                        SizedBox(height: 64),
+                        isComplete
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    child: Center(
+                                      child: CircleAvatar(
+                                        backgroundColor: clr1,
+                                        minRadius: 24,
+                                        child: Icon(Icons.refresh_rounded,
+                                            color: Colors.white),
                                       ),
-                                      SizedBox(width: 8),
-                                      Text("or",
-                                          style: TextStyle(color: Colors.grey)),
-                                      SizedBox(width: 8),
-                                      GestureDetector(
-                                        child: Center(
-                                          child: CircleAvatar(
-                                            backgroundColor: clr1,
-                                            minRadius: 24,
-                                            child: Icon(
-                                                Icons.arrow_forward_ios_rounded,
-                                                color: Colors.white),
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          if (index < 2) {
-                                            setState(() {
-                                              index++;
-                                              isComplete = false;
-                                              textController.text = "";
-                                            });
-                                          } else {
-                                            Get.snackbar("Code:Star",
-                                                "Reading Test completed!");
-                                            Navigator.pop(context);
-                                          }
-                                        },
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        textController.text = "";
+                                        isComplete = false;
+                                      });
+                                    },
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text("or",
+                                      style: TextStyle(color: Colors.grey)),
+                                  SizedBox(width: 8),
+                                  GestureDetector(
+                                    child: Center(
+                                      child: CircleAvatar(
+                                        backgroundColor: clr1,
+                                        minRadius: 24,
+                                        child: Icon(
+                                            Icons.arrow_forward_ios_rounded,
+                                            color: Colors.white),
                                       ),
-                                    ],
+                                    ),
+                                    onTap: () {
+                                      if (index < 2) {
+                                        setState(() {
+                                          index++;
+                                          isComplete = false;
+                                          textController.text = "";
+                                        });
+                                      } else {
+                                        Get.snackbar("Code:Star",
+                                            "Reading Test completed!");
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                ],
+                              )
+                            : isListening
+                                ? GestureDetector(
+                                    child: Center(
+                                      child: CircleAvatar(
+                                        backgroundColor: clr1,
+                                        minRadius: 24,
+                                        child: Icon(Icons.mic_off_rounded,
+                                            color: Colors.white),
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        isListening = false;
+                                      });
+                                      _speech.stop();
+                                    },
                                   )
-                                : isListening
-                                    ? GestureDetector(
-                                        child: Center(
-                                          child: CircleAvatar(
-                                            backgroundColor: clr1,
-                                            minRadius: 24,
-                                            child: Icon(Icons.mic_off_rounded,
-                                                color: Colors.white),
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          setState(() {
-                                            isListening = false;
-                                          });
-                                          _speech.stop();
-                                        },
-                                      )
-                                    : GestureDetector(
-                                        child: Center(
-                                          child: CircleAvatar(
-                                            backgroundColor: clr1,
-                                            minRadius: 24,
-                                            child: Icon(Icons.mic,
-                                                color: Colors.white),
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          print("tapped");
-                                          setState(() {
-                                            _listen();
-                                            isListening = true;
-                                          });
-                                        },
-                                      )
-                          ],
-                        )
-                      : SizedBox()
+                                : GestureDetector(
+                                    child: Center(
+                                      child: CircleAvatar(
+                                        backgroundColor: clr1,
+                                        minRadius: 24,
+                                        child: Icon(Icons.mic,
+                                            color: Colors.white),
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        _listen();
+                                        isListening = true;
+                                      });
+                                    },
+                                  )
+                      ],
+                    )
             ],
           ),
         ),

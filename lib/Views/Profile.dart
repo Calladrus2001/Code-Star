@@ -68,126 +68,129 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Get.to(() => AuthScreen());
           },
         ),
-        body: Column(
-          children: [
-            Container(
-              height: 90,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  color: clr1,
-                  borderRadius:
-                      BorderRadius.only(bottomRight: Radius.circular(40))),
-              child: Column(
-                children: [
-                  SizedBox(height: 40),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: Colors.white,
-                          child: Icon(
-                            Icons.account_circle_rounded,
-                            color: clr1,
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        Text("UserID: ${userID}",
-                            style: TextStyle(color: Colors.white))
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 24),
-            Center(
-              child: Container(
-                height: 100,
-                width: 200,
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                height: 90,
+                width: double.infinity,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    color: clr1),
+                    color: clr1,
+                    borderRadius:
+                        BorderRadius.only(bottomRight: Radius.circular(40))),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "Your Balance",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500),
+                    SizedBox(height: 40),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              Icons.account_circle_rounded,
+                              color: clr1,
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Text("UserID: ${userID}",
+                              style: TextStyle(color: Colors.white))
+                        ],
+                      ),
                     ),
-                    Text(balance.toString(),
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 36,
-                            fontWeight: FontWeight.w700))
                   ],
                 ),
               ),
-            ),
-            SizedBox(height: 24),
-            Text(
-              "Your Transaction History",
-              style: TextStyle(
-                  color: clr1, fontSize: 18, fontWeight: FontWeight.w500),
-            ),
-            haveHistory
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Container(
-                      child: SingleChildScrollView(
-                        child: ListView.builder(
-                            itemCount: histories!.history!.length,
-                            shrinkWrap: true,
-                            itemBuilder: (context, int idx) {
-                              return Card(
-                                elevation: 2.0,
-                                child: ListTile(
-                                  title: Text(histories!.history![idx].message!,
-                                      style:
-                                          TextStyle(fontSize: 14, color: clr1)),
-                                  // subtitle: Text(histories!.history![idx].time!,
-                                  //     style: TextStyle(color: Colors.grey)),
-                                  trailing:
-                                      histories!.history![idx].type == "Expense"
-                                          ? Text(
-                                              "-${histories!.history![idx].cost}",
-                                              style: TextStyle(
-                                                  color: Colors.red.shade300),
-                                            )
-                                          : Text(
-                                              "+${histories!.history![idx].cost}",
-                                              style: TextStyle(
-                                                  color: Colors.green.shade300),
-                                            ),
-                                ),
-                              );
-                            }),
+              SizedBox(height: 24),
+              Center(
+                child: Container(
+                  height: 100,
+                  width: 200,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      color: clr1),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Your Balance",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500),
+                      ),
+                      Text(balance.toString(),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 36,
+                              fontWeight: FontWeight.w700))
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Your Transaction History",
+                style: TextStyle(
+                    color: clr1, fontSize: 18, fontWeight: FontWeight.w500),
+              ),
+              haveHistory
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Container(
+                        child: SingleChildScrollView(
+                          child: ListView.builder(
+                              itemCount: histories!.history!.length,
+                              shrinkWrap: true,
+                              itemBuilder: (context, int idx) {
+                                return Card(
+                                  elevation: 2.0,
+                                  child: ListTile(
+                                    title: Text(
+                                        histories!.history![idx].message!,
+                                        style: TextStyle(
+                                            fontSize: 14, color: clr1)),
+                                    // subtitle: Text(histories!.history![idx].time!,
+                                    //     style: TextStyle(color: Colors.grey)),
+                                    trailing: histories!.history![idx].type ==
+                                            "Expense"
+                                        ? Text(
+                                            "-${histories!.history![idx].cost}",
+                                            style: TextStyle(
+                                                color: Colors.red.shade300),
+                                          )
+                                        : Text(
+                                            "+${histories!.history![idx].cost}",
+                                            style: TextStyle(
+                                                color: Colors.green.shade300),
+                                          ),
+                                  ),
+                                );
+                              }),
+                        ),
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 250,
+                            child: Image(
+                              image: AssetImage("assets/images/notFound.png"),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Looks like you haven't made any transactions yet.\nLet's make an Audiobook or attempt a test to get started.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                          )
+                        ],
                       ),
                     ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 250,
-                          child: Image(
-                            image: AssetImage("assets/images/notFound.png"),
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          "Looks like you haven't made any transactions yet.\nLet's make an Audiobook or attempt a test to get started.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
-                        )
-                      ],
-                    ),
-                  ),
-          ],
+            ],
+          ),
         ),
       ),
     );

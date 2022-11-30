@@ -281,22 +281,34 @@ class _AudioScreenState extends State<AudioScreen> {
               ? Center(child: CircularProgressIndicator(color: clr1))
               : Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 60),
-                        Image(
-                          image: AssetImage("assets/images/notFound.png"),
-                        ),
-                        SizedBox(height: 32),
-                        Text(
-                          "Looks like you don't have any Audiobooks yet\nSwipe right and make one!",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey, fontSize: 18),
-                        ),
-                      ],
-                    ),
-                  ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        children: [
+                          SizedBox(height: 60),
+                          Image(
+                            image: AssetImage("assets/images/notFound.png"),
+                          ),
+                          SizedBox(height: 32),
+                          Text(
+                            "Looks like you don't have any Audiobooks yet\nSwipe right and make one!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey, fontSize: 18),
+                          ),
+                          Expanded(child: SizedBox(height: 1)),
+                          GestureDetector(
+                            child: Chip(
+                              label: Text("Refresh",
+                                  style: TextStyle(color: clr1)),
+                              backgroundColor: Colors.white,
+                              elevation: 4.0,
+                            ),
+                            onTap: () {
+                              _refresh();
+                            },
+                          ),
+                          SizedBox(height: 8),
+                        ],
+                      )),
                 ),
     );
   }

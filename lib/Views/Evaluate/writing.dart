@@ -22,7 +22,8 @@ class _HearingTestState extends State<HearingTest> {
   pageStatus status = pageStatus.START;
   bool isDiffSelected = false;
   int? _value = 0;
-  List<String> urls = [];
+  int idx = 0;
+  List<dynamic> urls = [];
   final audioplayer = AudioPlayer();
   bool isPlaying = false;
   Duration duration = Duration.zero;
@@ -30,7 +31,27 @@ class _HearingTestState extends State<HearingTest> {
 
   @override
   void initState() {
-    UserID = box.read("UserID");
+    UserID = box.read("userID");
+    audioplayer.onPlayerStateChanged.listen((state) {
+      setState(() {
+        isPlaying = state == PlayerState.playing;
+      });
+    });
+    audioplayer.onDurationChanged.listen((newDuration) {
+      setState(() {
+        duration = newDuration;
+      });
+    });
+    audioplayer.onPositionChanged.listen((newPosition) {
+      setState(() {
+        position = newPosition;
+      });
+    });
+    audioplayer.onPlayerComplete.listen((event) {
+      setState(() {
+        position = Duration.zero;
+      });
+    });
     super.initState();
   }
 
@@ -42,6 +63,7 @@ class _HearingTestState extends State<HearingTest> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: 40),
               Align(
@@ -123,6 +145,7 @@ class _HearingTestState extends State<HearingTest> {
                                   urls = res["urls"];
                                   status = pageStatus.ONGOING;
                                 });
+                                print(urls);
                               }
                             } else {
                               Get.snackbar(
@@ -132,11 +155,132 @@ class _HearingTestState extends State<HearingTest> {
                         )
                       ],
                     )
-                  : SizedBox(),
+                  : Column(
+                      children: [
+                        SizedBox(height: 60),
+                        Text("Quote ${idx + 1}",
+                            style: TextStyle(color: clr1, fontSize: 24)),
+                        SizedBox(height: 16),
+                        Container(
+                          height: 105,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              color: clr1,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10))),
+                          child: Center(
+                              child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Column(
+                              children: [
+                                Slider(
+                                  inactiveColor: Colors.blueGrey.shade200,
+                                  activeColor: Colors.white,
+                                  min: 0,
+                                  max: duration.inSeconds.toDouble(),
+                                  value: position.inSeconds.toDouble(),
+                                  onChanged: (value) async {
+                                    final pos =
+                                        Duration(seconds: value.toInt());
+                                    await audioplayer.seek(pos);
+                                    await audioplayer.resume();
+                                  },
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(_printDuration(position),
+                                        style: TextStyle(color: Colors.white)),
+                                    GestureDetector(
+                                      child: CircleAvatar(
+                                        radius: 22,
+                                        backgroundColor: Colors.white,
+                                        child: CircleAvatar(
+                                          backgroundColor: clr1,
+                                          radius: 20,
+                                          child: isPlaying
+                                              ? Icon(
+                                                  Icons.pause,
+                                                  color: Colors.white,
+                                                )
+                                              : Icon(
+                                                  Icons.play_arrow,
+                                                  color: Colors.white,
+                                                ),
+                                        ),
+                                      ),
+                                      onTap: () async {
+                                        if (isPlaying) {
+                                          await audioplayer.pause();
+                                        } else {
+                                          await audioplayer
+                                              .play(UrlSource(urls[idx]));
+                                        }
+                                      },
+                                    ),
+                                    Text(_printDuration(duration),
+                                        style: TextStyle(color: Colors.white)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )),
+                        ),
+                        SizedBox(height: 36),
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          decoration: BoxDecoration(
+                              border: Border.all(color: clr1, width: 1.5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              color: Colors.white),
+                          child: TextField(
+                            maxLines: 4,
+                            keyboardType: TextInputType.multiline,
+                            decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintStyle: TextStyle(fontSize: 16),
+                                hintText:
+                                    "Enter the transcription of the Audio file played"),
+                            style: TextStyle(fontSize: 18, color: clr1),
+                          ),
+                        ),
+                        SizedBox(height: 144),
+                        GestureDetector(
+                          child: CircleAvatar(
+                            minRadius: 25,
+                            backgroundColor: clr1,
+                            child: Icon(Icons.arrow_forward_ios_rounded,
+                                color: Colors.white),
+                          ),
+                          onTap: () {
+                            if (idx < urls.length - 1) {
+                              setState(() {
+                                idx++;
+                              });
+                            } else {
+                              Get.snackbar(
+                                  "Code:Star", "Writing Test Completed");
+                              Navigator.pop(context);
+                            }
+                          },
+                        )
+                      ],
+                    ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  String _printDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
   }
 }

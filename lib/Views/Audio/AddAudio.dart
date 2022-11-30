@@ -172,7 +172,7 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                   ? Chip(
                       backgroundColor: Colors.green.shade500,
                       label: Text("Audiobook is available now",
-                          style: TextStyle(color: clr1)),
+                          style: TextStyle(color: Colors.white)),
                     )
                   : status == audioStatus.NOT_STARTED
                       ? GestureDetector(
@@ -201,20 +201,18 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                             }
                           },
                         )
-                      : SizedBox(),
-              SizedBox(height: 64),
-              status == audioStatus.UPLOADING
-                  ? Column(
-                      children: [
-                        Center(child: CircularProgressIndicator(color: clr1)),
-                        SizedBox(height: 24),
-                        Text(
-                          "Uploading Audiobook, Please do not close this screen",
-                          style: TextStyle(color: Colors.grey),
+                      : Column(
+                          children: [
+                            SizedBox(height: 64),
+                            Center(
+                                child: CircularProgressIndicator(color: clr1)),
+                            SizedBox(height: 24),
+                            Text(
+                              "Uploading Audiobook, Please do not close this screen",
+                              style: TextStyle(color: Colors.grey),
+                            )
+                          ],
                         )
-                      ],
-                    )
-                  : SizedBox()
             ],
           ),
         ),
@@ -260,7 +258,7 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
         });
         if (response.statusCode == 200) {
           setState(() {
-            status == audioStatus.UPLOADED;
+            status = audioStatus.UPLOADED;
           });
         }
       });

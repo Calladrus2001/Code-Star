@@ -172,7 +172,7 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
                   ? Chip(
                       backgroundColor: Colors.green.shade500,
                       label: Text("Audiobook is available now",
-                          style: TextStyle(color: Colors.white)),
+                          style: TextStyle(color: clr1)),
                     )
                   : status == audioStatus.NOT_STARTED
                       ? GestureDetector(

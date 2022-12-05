@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:code_star/Utils/constants.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
@@ -31,17 +29,11 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
   TextEditingController nameController = new TextEditingController();
   late String downloadUrl;
   late String userID;
-  late FlutterTts flutterTts;
   var progress = 0.0;
-
-  void initTTS() async {
-    flutterTts = FlutterTts();
-  }
 
   @override
   void initState() {
     userID = box.read("userID");
-    initTTS();
     super.initState();
   }
 
@@ -241,27 +233,16 @@ class _AddAudioScreenState extends State<AddAudioScreen> {
   }
 
   void synth(String text) async {
-    await flutterTts.synthesizeToFile(text, "${nameController.text}.wav");
-    await flutterTts.awaitSynthCompletion(true).then((value) async {
-      final destination = "${userID}/${nameController.text}.wav";
-      final ref = FirebaseStorage.instance.ref(destination);
-      UploadTask? task = ref.putFile(File(
-          "/storage/emulated/0/Android/data/com.example.code_star/files/${nameController.text}.wav"));
-      task.then((res) async {
-        downloadUrl = await res.ref.getDownloadURL();
-        var response = await http.post(Uri.parse("${baseUrl}/addAudio"), body: {
-          "userID": userID,
-          "name": "${nameController.text}",
-          "downloadUrl": downloadUrl,
-          "time":
-              "${DateFormat.MMMMd().format(rn)} ${DateFormat.jm().format(rn)}"
-        });
-        if (response.statusCode == 200) {
-          setState(() {
-            status = audioStatus.UPLOADED;
-          });
-        }
-      });
+    var response = await http.post(Uri.parse("$baseUrl/synthAudio"), body: {
+      "userID": userID,
+      "name": nameController.text,
+      "time": "${DateFormat.MMMMd().format(rn)} ${DateFormat.jm().format(rn)}",
+      "text": text
     });
+    if (response.statusCode == 200) {
+      setState(() {
+        status = audioStatus.UPLOADED;
+      });
+    }
   }
 }

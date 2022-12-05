@@ -30,7 +30,7 @@ Since this year's Google I/O, the process of initialising Firebase in your proje
 Following which, run `flutterfire configure` to select a project and it's target platforms. Now go back to [Firebase console](https://console.firebase.google.com/u/0/) and enable **Firebase Storage**.
 ## Demo
 
-[Link to Demo Video: PENDING]()
+[Presentation Video](https://youtu.be/DeV6T9TCAzg) [Demo Video](https://youtu.be/AxHoiOyVks4)
 
 
 ## Diagrams
